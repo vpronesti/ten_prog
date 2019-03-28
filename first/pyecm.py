@@ -534,7 +534,7 @@ def naf(d):
 -1's with 3's, and interprets the result base 4.
 
 Returns the result interpreted as if in base 4.'''
-   g = 0L
+   g = 0
    while d:
       g <<= 2
       g ^= ((d & 2) & (d << 1)) ^ (d & 1)
@@ -602,7 +602,7 @@ Returns a list of Taylor series.'''
    while r != rho_series.coefficients[0]:
       deg = (deg + (deg << 2)) / 3
       r = rho_series.coefficients[0]
-      rho_series = ts(deg, acc, [(1L) << acc])
+      rho_series = ts(deg, acc, [(1) << acc])
       center = 0.5
       for i in xrange(1, n+1):
          f.set(rho_series)
@@ -787,8 +787,8 @@ def congrats(f, veb):
 Returns nothing.'''
 
    if veb and f > RECORD:
-      print 'Congratulations! You may have found a record factor via pyecm!'
-      print 'Please email the Mainloop call to Eric Larson <elarson3@uoregon.edu>'
+      print ('Congratulations! You may have found a record factor via pyecm!')
+      print ('Please email the Mainloop call to Eric Larson <elarson3@uoregon.edu>')
 
    return
 
@@ -802,8 +802,8 @@ Yields factors of n.'''
       return
 
    if veb:
-      print 'Found factor:', f
-      print 'Mainloop call was:', n, u, curve_params
+      print ('Found factor:', f)
+      print ('Mainloop call was:', n, u, curve_params)
 
    if isprime(f):
       congrats(f, veb)
@@ -812,7 +812,7 @@ Yields factors of n.'''
       if isprime(n):
          yield n
       if veb:
-         print '(factor processed)'
+         print ('(factor processed)')
       return
 
    for factor in sub_sure_factors(f, u, curve_params):
@@ -821,7 +821,7 @@ Yields factors of n.'''
          yield factor
       else:
          if veb:
-            print 'entering new ecm loop to deal with stubborn factor:', factor
+            print ('entering new ecm loop to deal with stubborn factor:', factor)
          for factor_of_factor in ecm(factor, True, ov, veb, tdb, pr):
             yield factor_of_factor
       n /= factor
@@ -830,7 +830,7 @@ Yields factors of n.'''
       yield n
 
    if veb:
-      print '(factor processed)'
+      print ('(factor processed)')
    return
 
 def to_tuple(p):
@@ -1237,7 +1237,7 @@ Notes:
          new_looking_for += new_looking_for << 2
          if new_looking_for != looking_for:
             looking_for = new_looking_for
-            print 'Searching for primes around', looking_for, 'digits'
+            print ('Searching for primes around', looking_for, 'digits')
 
    return
 
@@ -1260,7 +1260,7 @@ Notes:
 
 
    if type(n) not in T:
-      raise ValueError, 'Number given must be integer or long.'
+      raise (ValueError, 'Number given must be integer or long.')
 
    if not 0 < pr <= 1:
       yield 'Error: pr must be between 0 and 1'
@@ -1335,7 +1335,7 @@ Returns True or False.'''
    return True
 
 def help():
-   print   '''\
+   print   ('''\
 Usage: pyecm [OPTION] [expression to factor]
 Factor numbers using the Elliptic Curve Method.
 
@@ -1360,7 +1360,7 @@ and results.
 
 With no integers to factor given via command-line, read standard input.
 
-Please report bugs to Eric Larson <elarson3@uoregon.edu>.'''
+Please report bugs to Eric Larson <elarson3@uoregon.edu>.''')
    sys.exit()
 
 def command_line(veb, ra, ov, pr):
@@ -1383,28 +1383,28 @@ def command_line(veb, ra, ov, pr):
       else:
          help()
 
-      print   'Factoring %d:' % n
+      print   ('Factoring %d:' % n)
       if n < 0:
          print   -1
          n = -n
       if n == 0:
-         print   '0 does not have a well-defined factorization.'
+         print   ('0 does not have a well-defined factorization.')
          continue
       elif n == 1:
-         print   1
+         print   (1)
          continue
 
       if ov == DUMMY:
          ov = 2*math.log(math.log(n))
       for factor in factors(n, veb, ra, ov, pr):
-         print factor
+         print (factor)
 
 def interactive(veb, ra, ov, pr):
-   print   'pyecm v. %s (interactive mode):' % VERSION
-   print   'Type "exit" at any time to quit.'
-   print
+   print   ('pyecm v. %s (interactive mode):' % VERSION)
+   print   ('Type "exit" at any time to quit.')
+   print ('')
 
-   response = raw_input()
+   response = input()
    while response != 'exit' and response != 'quit':
       if valid_input(response):
          response = response.replace('^', '**')
@@ -1416,27 +1416,27 @@ def interactive(veb, ra, ov, pr):
       else:
          help()
 
-      print   'Factoring number %d:' % n
+      print   ('Factoring number %d:' % n)
       if n < 0:
          print   -1
          n = -n
       if n == 0:
-         print   '0 does not have a well-defined factorization.'
+         print   ('0 does not have a well-defined factorization.')
          print
-         response = raw_input()
+         response = input()
          continue
       elif n == 1:
-         print   1
+         print   (1)
          print
-         response = raw_input()
+         response = input()
          continue
 
       if ov == DUMMY:
          ov = 2*math.log(math.log(n))
       for factor in factors(n, veb, ra, ov, pr):
-         print   factor
+         print   (factor)
       print
-      response = raw_input()
+      response = input()
 
 def main():
    ra = veb = False
@@ -1468,8 +1468,8 @@ def main():
                veb = True
       else:
          if not valid_input(item):
-            print 'I am confused about the following: "%s". Here\'s the help page:' % item
-            print
+            print ('I am confused about the following: "%s". Here\'s the help page:' % item)
+            print()
             help()
 
    if len(sys.argv) > 1 and not is_switch(sys.argv[-1]):
