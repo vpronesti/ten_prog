@@ -4,8 +4,6 @@
 You should install psyco and gmpy if you want maximal speed.
 
 Filename: pyecm
-Authors: Eric Larson <elarson3@uoregon.edu>, Martin Kelly <martin@martingkelly.com>,
-License: GNU GPL (see <http://www.gnu.org/licenses/gpl.html> for more information.
 Description: Factors a number using the Elliptic Curve Method, a fast algorithm for numbers < 50 digits.
 
 We are using curves in Suyama's parametrization, but points are in affine coordinates, and the curve is in Wierstrass form.
@@ -18,12 +16,7 @@ import math
 import sys
 import random
 
-try:
-   import psyco
-   psyco.full()
-   PSYCO_EXISTS = True
-except ImportError:
-   PSYCO_EXISTS = False
+PSYCO_EXISTS = False
 
 try:  # Try to use gmpy
    from gmpy2 import isqrt as sqrt
@@ -31,187 +24,13 @@ try:  # Try to use gmpy
    from gmpy2 import gcd, invert, mpz, next_prime, is_prime
    import gmpy2
    GMPY_EXISTS = True
+   print('gmpy2 ok')
 except ImportError:
    try:
       from gmpy import gcd, invert, mpz, next_prime, sqrt, root
       GMPY_EXISTS = True
    except ImportError:
       GMPY_EXISTS = False
-
-if not GMPY_EXISTS:
-   PRIMES = (5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 167)
-   GMPY_EXISTS = False
-
-   def gcd(a, b):
-      '''Computes the Greatest Common Divisor of a and b using the standard quadratic time improvement to the Euclidean Algorithm.
-
-   Returns the GCD of a and b.'''
-      if b == 0:
-         return a
-      elif a == 0:
-         return b
-
-      count = 0
-
-      if a < 0:
-         a = -a
-      if b < 0:
-         b = -b
-
-      while not ((a & 1) | (b & 1)):
-         count += 1
-         a >>= 1
-         b >>= 1
-
-      while not a & 1:
-         a >>= 1
-
-      while not b & 1:
-         b >>= 1
-
-      if b > a:
-         b, a = a, b
-
-      while b != 0 and a != b:
-         a -= b
-         while not (a & 1):
-            a >>= 1
-
-         if b > a:
-            b, a = a, b
-
-      return a << count
-
-   def invert(a, b):
-      '''Computes the inverse of a modulo b. b must be odd.
-
-Returns the inverse of a (mod b).'''
-      if a == 0 or b == 0:
-         return 0
-
-      truth = False
-      if a < 0:
-         truth = True
-         a = -a
-
-      b_orig = b
-      alpha = 1
-      beta = 0
-
-      while not a & 1:
-         if alpha & 1:
-            alpha += b_orig
-         alpha >>= 1
-         a >>= 1
-
-      if b > a:
-         a, b = b, a
-         alpha, beta = beta, alpha
-
-      while b != 0 and a != b:
-         a -= b
-         alpha -= beta
-
-         while not a & 1:
-            if alpha & 1:
-               alpha += b_orig
-            alpha >>= 1
-            a >>= 1
-
-         if b > a:
-            a, b = b, a
-            alpha, beta = beta, alpha
-
-      if a == b:
-         a -= b
-         alpha -= beta
-         a, b = b, a
-         alpha, beta = beta, alpha
-
-      if a != 1:
-         return 0
-
-      if truth:
-         alpha = b_orig - alpha
-
-      return alpha
-
-   def next_prime(n):
-      '''Finds the next prime after n.
-
-Returns the next prime after n.'''
-      n += 1
-      if n <= 167:
-         if n <= 23:
-            if n <= 3:
-               return 3 - (n <= 2)
-            n += (n & 1) ^ 1
-            return n + (((4 - (n % 3)) >> 1) & 2)
-
-         n += (n & 1) ^ 1
-         inc = n % 3
-         n += ((4 - inc) >> 1) & 2
-         inc = 6 - ((inc + ((2 - inc) & 2)) << 1)
-
-         while 0 in (n % 5, n % 7, n % 11):
-            n += inc
-            inc = 6 - inc
-         return n
-
-      n += (n & 1) ^ 1
-      inc = n % 3
-      n += ((4 - inc) >> 1) & 2
-      inc = 6 - ((inc + ((2 - inc) & 2)) << 1)
-      should_break = False
-
-      while 1:
-         for prime in PRIMES:
-            if not n % prime:
-               should_break = True
-               break
-
-         if should_break:
-            should_break = False
-            n += inc
-            inc = 6 - inc
-            continue
-
-         p = 1
-         for i in range(int(math.log(n) / LOG_2), 0, -1):
-            p <<= (n >> i) & 1
-            p = (p * p) % n
-
-         if p == 1:
-            return n
-
-         n += inc
-         inc = 6 - inc
-
-   def mpz(n):
-      '''A dummy function to ensure compatibility with those that do not have gmpy.
-
-Returns n.'''
-      return n
-
-   def root(n, k):
-      '''Finds the floor of the kth root of n. This is a duplicate of gmpy's root function.
-
-Returns a tuple. The first item is the floor of the kth root of n. The second is 1 if the root is exact (as in, sqrt(16)) and 0 if it is not.'''
-      low = 0
-      high = n + 1
-      while high > low + 1:
-         mid = (low + high) >> 1
-         mr = mid ** k
-         if mr == n:
-            return (mid, 1)
-         if mr < n:
-            low = mid
-         if mr > n:
-            high = mid
-      return (low, 0)
-
-   def sqrt(n):
-      return root(n, 2)[0]
 
 # We're done importing. Now for some constants.
 if GMPY_EXISTS:
