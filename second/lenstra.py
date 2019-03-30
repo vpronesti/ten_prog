@@ -14,7 +14,6 @@ from gmpy2 import next_prime
 import math
 import copy
 
-
 class Lenstra(object):
     def create_curve(self):
         """
@@ -78,17 +77,7 @@ class Lenstra(object):
             delta_vector.append(dd)
         
         num_primes = len(delta_vector)
-            
-#         for i in range(num_primes):
-#             delta_vector.append(0)
-# 
-#         for j in range(1, num_primes):
-#             q1 = next_prime(q + 1)
-#             dd = q1 - q
-#             q = q1
-#             if dd > delta_max:
-#                 delta_max = dd
-#             delta_vector[j] = dd
+        
         print("greatest prime minor than b2 is: ", q1)
 
         ### matrix
@@ -107,9 +96,68 @@ class Lenstra(object):
             print("phase 1")
             p = self.mul(k, p)
             if self.is_not_point(p):
+                if p is None:
+                    raise BaseException('prime number')
                 print("found factor here", p)
                 return
-#             print("phase 2")
+
+            print("phase 2")
+            
+            
+            prime_i = next_prime(b1)
+            while prime_i < b2:
+                q_i = self.mul(prime_i, p)
+                if self.is_not_point(q_i):
+                    if q_i is None:
+                        raise BaseException('prime number')
+                    raise BaseException('p2 is not a point, found factor: ', q_i)
+                prime_i = next_prime(prime_i)
+                
+            print("phase two failed")
+            
+#             R_i_d = {}
+#             R_i = []
+#             for i in range(2, delta_max + 1, 2):
+#                 p2 = self.mul(i, p)
+#                 R_i_d[i] = p2
+#                 R_i.append(p2)
+#                 if self.is_not_point(p2):
+#                     raise BaseException('p2 is not a point')
+#             
+#             #prime_i_minus_1 = next_prime(b1)
+#             prime_i = next_prime(b1)
+#             while prime_i < b2:
+#                 prime_i_minus_1 = prime_i
+#                 prime_i = next_prime(prime_i)
+#                 if prime_i <= b2:
+#                     R_i.append(prime_i - prime_i_minus_1)
+#                     prime_i = next_prime(prime_i)
+#                 else:
+#                     break
+#             
+#                 
+#             prime_i = next_prime(b1)
+#             q1 = self.mul(prime_i, p)
+#             if self.is_not_point(q1):
+#                 raise BaseException('p2 is not a point, found factor: ', q1)
+#             prime_i = next_prime(prime_i)
+#             Q_i = []
+#             Q_i.append(q1)
+#             print(len(Q_i))
+#             i = 1
+#             while prime_i < b2:
+#                 i += 1
+#                 q_i_minus_1 = Q_i[i - 2]
+#                 r_i_minus_1 = R_i[i - 2]
+#                 q_i = self.partial_addition(q_i_minus_1, r_i_minus_1)
+#                 if (self.is_not_point(q_i)):
+#                     raise BaseException('p2 is not a point, found factor: ', q1)
+#                 Q_i.append(q_i)
+#                 prime_i = next_prime(prime_i)
+              
+              
+              
+              # ecm.gp              
 #             q = next_prime(b1)
 #             p2 = self.mul(q, p)
 #             if self.is_not_point(p2):
@@ -121,7 +169,7 @@ class Lenstra(object):
 #                 bb[i][0] = p3.X
 #                 bb[i][1] = p3.Y
 #                 p3 = self.partial_addition(p3, pp)
-# 
+#  
 #             q1 = q
 #             for i in range(num_primes):
 #                 kk = int(delta_vector[i]/2)
@@ -214,12 +262,13 @@ if __name__ == "__main__":
     p = next_prime(10**15)
     q = next_prime(10**50)
        
-    l = Lenstra(12)
-    l = Lenstra(100000000000003700000000000000000000000000000000151000000000005587)
+    
     l = Lenstra(100000000000003700000000000000000000000000000000000000000000000000000000000000129000000000004773)
     l = Lenstra(100000000380000000361)
     # 70 target
     l = Lenstra(10000000000000000000000000000000000000000000000000000000000000000000033)
     
     l = Lenstra(1965161657812314865184863151684561324886451235479813157)
+    l = Lenstra(100000000000003700000000000000000000000000000000151000000000005587)
+    l = Lenstra(1000000000000037)
     l.factorECM(10000, 100)
