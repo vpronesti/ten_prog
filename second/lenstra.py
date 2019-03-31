@@ -26,6 +26,9 @@ class Lenstra(object):
                 self.A = self._generate_random_number()
                 self.B = f_mod((self.Y * self.Y - self.X * self.X * self.X - self.A * self.X), self.N)
                 curve = EllipticCurve(self.N, self.A, self.B)
+                
+                self.point = Point(curve, self.X, self.Y)
+                
                 return curve
             except Exception as e:
                 print("Error when curve is generated %s" % str(e))
@@ -63,6 +66,16 @@ class Lenstra(object):
         num_primes = math.floor(b2/math.log(b2))
         q = next_prime(b1)
         delta_max = 2
+        
+        i = 0
+        n = b1
+        while True:
+            n = next_prime(n)
+            if n < b2:
+                i += 1
+            else:
+                break
+        print("actual number of primes in b1 b2 is: ", n)
 
         # create delta vector with the distance between primes in [b1, b2]
         delta_vector = []
@@ -90,9 +103,11 @@ class Lenstra(object):
             bb.append(cols)
 
         for j in range(max_round):
-            self.create_curve() # generate new random curve c and point p
+            print('round: ', j)
+            self.curve = self.create_curve() # generate new random curve c and point p
             e = self.curve
             p = self.point
+            print('curve ' + str(e) + ' point ' + str(p))
             print("phase 1")
             p = self.mul(k, p)
             if self.is_not_point(p):
@@ -103,47 +118,86 @@ class Lenstra(object):
 
             print("phase 2")
             
+            # very slow implementation
+#             prime_i = next_prime(b1)
+#             while prime_i < b2:
+#                 q_i = self.mul(prime_i, p)
+#                 if self.is_not_point(q_i):
+#                     if q_i is None:
+#                         raise BaseException('prime number')
+#                     raise BaseException('p2 is not a point, found factor: ', q_i)
+#                 prime_i = next_prime(prime_i)
+#                 
+#             print("phase two failed")
             
+            R_i_d = {}
+            R_i = []
+            for i in range(2, delta_max + 1, 2):
+                p2 = self.mul(i, p)
+                if self.is_not_point(p2):
+                    if p2 is None:
+                        pass
+                        #raise BaseException('prime number')
+                    #raise BaseException('p2 is not a point')
+                R_i_d[i] = p2
+                #print('adding item: ', i)
+                R_i.append(p2)
+                
             prime_i = next_prime(b1)
+            q_i = self.mul(prime_i, p)
+            if self.is_not_point(q_i):
+                if q_i is None:
+                    pass
+                    #raise BaseException('prime number')
+                raise BaseException('q_i is not a point, factor should be ', prime_i)
+            
             while prime_i < b2:
-                q_i = self.mul(prime_i, p)
+                prime_i_minus_1 = prime_i
+                prime_i = next_prime(prime_i)
+                if prime_i >= b2:
+                    break
+                q_i_minus_1 = q_i
+                #print('len R_i: ', len(R_i))
+                #print('delta max: ', delta_max)
+                #print('accessing item: ', prime_i - prime_i_minus_1)
+                q_i = self.partial_addition(q_i_minus_1, R_i_d[prime_i - prime_i_minus_1])
                 if self.is_not_point(q_i):
                     if q_i is None:
                         raise BaseException('prime number')
-                    raise BaseException('p2 is not a point, found factor: ', q_i)
-                prime_i = next_prime(prime_i)
-                
-            print("phase two failed")
-            
-#             R_i_d = {}
+                    print('q_i is not a point, found factor: ', int(q_i))
+                    return
+             
+            #prime_i_minus_1 = next_prime(b1)
 #             R_i = []
-#             for i in range(2, delta_max + 1, 2):
-#                 p2 = self.mul(i, p)
-#                 R_i_d[i] = p2
-#                 R_i.append(p2)
-#                 if self.is_not_point(p2):
-#                     raise BaseException('p2 is not a point')
-#             
-#             #prime_i_minus_1 = next_prime(b1)
 #             prime_i = next_prime(b1)
+#             prime_i = next_prime(next_prime(prime_i))
 #             while prime_i < b2:
 #                 prime_i_minus_1 = prime_i
 #                 prime_i = next_prime(prime_i)
 #                 if prime_i <= b2:
-#                     R_i.append(prime_i - prime_i_minus_1)
+#                     delta_i = prime_i - prime_i_minus_1
+#                     r_i = self.mul(delta_i, p)
+#                     if (self.is_not_point(r_i)):
+#                         if r_i is None:
+#                             raise BaseException('prime number')
+#                         raise BaseException('r_i is not a point, found factor: ', r_i)
+#                     R_i.append(r_i)
 #                     prime_i = next_prime(prime_i)
 #                 else:
 #                     break
-#             
-#                 
+#              
+#                  
 #             prime_i = next_prime(b1)
 #             q1 = self.mul(prime_i, p)
 #             if self.is_not_point(q1):
+#                 if q1 is None:
+#                     raise BaseException('prime number')
 #                 raise BaseException('p2 is not a point, found factor: ', q1)
 #             prime_i = next_prime(prime_i)
 #             Q_i = []
 #             Q_i.append(q1)
-#             print(len(Q_i))
+#             print("len Qi vector: ", len(Q_i))
+#             print("len Ri vector: ", len(R_i))
 #             i = 1
 #             while prime_i < b2:
 #                 i += 1
@@ -271,4 +325,21 @@ if __name__ == "__main__":
     l = Lenstra(1965161657812314865184863151684561324886451235479813157)
     l = Lenstra(100000000000003700000000000000000000000000000000151000000000005587)
     l = Lenstra(1000000000000037)
-    l.factorECM(10000, 100)
+    l = Lenstra(10000019)
+    l = Lenstra(1000000000000037) # np 10^15
+    l = Lenstra(100000000000000000000000000000000000000000000000000000000000000000000334789483)
+    
+    p = next_prime(10**30)
+    q = next_prime(10**25)
+    l = Lenstra(p*q)
+    
+    #l = Lenstra(next_prime(10**10) + 153485383515235)
+    
+    # RSA-130
+    #l = Lenstra(1807082088687404805951656164405905566278102516769401349170127021450056662540244048387341127590812303371781887966563182013214880557)
+    # RSA-100
+    #l = Lenstra(1522605027922533360535618378132637429718068114961380688657908494580122963258952897654000350692006139)
+    l.factorECM(16000, 100)
+    # meno di 45 cifre basta 11000
+    # sopra le 45 bisogna aumentare tipo 15000
+    #          55
